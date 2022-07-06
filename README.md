@@ -115,7 +115,13 @@ Quote alert shows more details when clicking buy
 4. Turn off lights
    https://community.getumbrel.com/t/turn-off-the-leds-of-the-raspberry-pi/406
 
-5. Setup mariadb
+5. Generate the .env files by running in terminal
+
+`cd path/to/Crypto Sniper`
+
+`python3 generate_dotenvs.py`
+
+6. Setup mariadb
    https://pimylifeup.com/raspberry-pi-mysql/.
    While logged in as root, create a usergroup like this
 
@@ -124,7 +130,7 @@ Quote alert shows more details when clicking buy
    `$ GRANT ALL PRIVILEGES ON *.* TO 'piuser'@'%' IDENTIFIED BY '<your sql user password for piuser>';`
 
    `$ FLUSH PRIVILEGES;`
-   Rename the tokens_rpi/env file to tokens_rpi/.env (including the dot). In the tokens_rpi/.env file replace `sql_pass` with the password used above. Ensure the other params under '# sql' are correct. Change the bind address for remote connections
+   In the tokens_rpi/.env file replace `sql_pass` with the password used above. Ensure the other params under '# sql' are correct. Change the bind address for remote connections
 
    `$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf`
 
@@ -136,23 +142,23 @@ Quote alert shows more details when clicking buy
    In Workbench open a connection with piuser user.
    To create the tokens table run the create command in file database/db_create.sql
 
-6. Change bscscan environment vars in tokens_rpi/.env file by setting
+7. Change bscscan environment vars in tokens_rpi/.env file by setting
    variables under '# bscscan' from your bscscan account. Sign up for an account here https://bscscan.com/
 
-7. Change google environment vars in tokens_rpi/.env file by setting
+8. Change google environment vars in tokens_rpi/.env file by setting
    variables under '# google' from your google api account. Sign up for an account here https://developers.google.com/custom-search/v1/introduction
 
-8. setup Cyberduck or Putty for file transfer to pi. Transfer folder from repo called "tokens_rpi" to /home/pi/ on pi
+9. setup Cyberduck or Putty for file transfer to pi. Transfer folder from repo called "tokens_rpi" to /home/pi/ on pi
 
-9. in pi terminal install pip3
+10. in pi terminal install pip3
 
-   `$ sudo apt-get install python3-pip`
+`$ sudo apt-get install python3-pip`
 
-10. in pi terminal, insatll all python modules for the project
+11. in pi terminal, insatll all python modules for the project
 
     `$ pip3 install -r tokens_rpi/requirements.txt`
 
-11. in pi terminal setup scraping tools
+12. in pi terminal setup scraping tools
 
     `$ sudo apt-get install chromium-chromedriver`
 
@@ -164,14 +170,14 @@ Quote alert shows more details when clicking buy
 
     `$ sudo apt-get install xvfb`
 
-12. In pi terminal set cronjobs
+13. In pi terminal set cronjobs
 
     `$ crontab -e`
 
     If opening for the first time select '1. /bin/nano'.
     Paste contents from "tokens_rpi/crontab-e.txt" into the bottom of crontab file and save.
 
-13. Wait approx 10 minutes for some tokens to load
+14. Wait approx 10 minutes for some tokens to load
     or check the output of check_new for some new tokens
 
     `$ cd tokens_rpi`
@@ -190,9 +196,7 @@ Quote alert shows more details when clicking buy
 
 ### SETUP CLIENT
 
-1. Rename the client/env file to client/.env (including the dot).
-
-2. Install the environment variables in the client/.env file by replacing the following variables
+1. Install the environment variables in the client/.env file by replacing the following variables
 
    - `is_dev_buy`
      see the message about what to leave it to, suggested to leave it as true
@@ -212,7 +216,7 @@ Quote alert shows more details when clicking buy
    - `backup_folder`
      with a filepath on the client computer to backup the tokens table
 
-3. To run the client server
+2. To run the client server
    on your client computer open the terminal and run flask with
 
    `$ cd /path/to/Crypto Sniper/client`
