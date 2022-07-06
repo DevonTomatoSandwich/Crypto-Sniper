@@ -16,10 +16,10 @@ logs
 *.log
 
 # matplot or other picture files
-*.png
+lock_block_plot.png
 
 # strategies / clutter
 research/
 
 # environment
-# .env* # todo last 2nd commit will gitignore this
+.env*
