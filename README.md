@@ -124,8 +124,7 @@ Quote alert shows more details when clicking buy
    `$ GRANT ALL PRIVILEGES ON *.* TO 'piuser'@'%' IDENTIFIED BY '<your sql user password for piuser>';`
 
    `$ FLUSH PRIVILEGES;`
-
-   In the tokens_rpi/.env file replace `sql_pass` with the password used above. Ensure the other params under '# sql' are correct. Change the bind address for remote connections
+   Rename the tokens_rpi/env file to tokens_rpi/.env (including the dot). In the tokens_rpi/.env file replace `sql_pass` with the password used above. Ensure the other params under '# sql' are correct. Change the bind address for remote connections
 
    `$ sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf`
 
@@ -191,7 +190,9 @@ Quote alert shows more details when clicking buy
 
 ### SETUP CLIENT
 
-1. Install the environment variables in the client/.env file by replacing the following variables
+1. Rename the client/env file to client/.env (including the dot).
+
+2. Install the environment variables in the client/.env file by replacing the following variables
 
    - `is_dev_buy`
      see the message about what to leave it to, suggested to leave it as true
@@ -211,7 +212,7 @@ Quote alert shows more details when clicking buy
    - `backup_folder`
      with a filepath on the client computer to backup the tokens table
 
-2. To run the client server
+3. To run the client server
    on your client computer open the terminal and run flask with
 
    `$ cd /path/to/Crypto Sniper/client`
