@@ -1,0 +1,20 @@
+# to be pasted at bottom of crontab file
+# file can be opened on rpi with command 
+#  crontab -e
+
+
+# checks for new tokens
+4-59/5 * * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/check_new.py > /home/pi/tokens_rpi/check_new.log 2>&1'
+# checks early for ok tokens
+*/5 * * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/check_early.py > /home/pi/tokens_rpi/check_early.log 2>&1'
+# checks mature for good tokens
+1-56/5 * * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/check_mature.py > /home/pi/tokens_rpi/check_mature.log 2>&1'
+
+# check_liquidity marks-bad any good coins that have fallen below 0.5 bnb
+4-59/5 * * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/check_liquidity.py > /home/pi/tokens_rpi/check_liquidity.log 2>&1'
+
+# checks for google search count result
+*/15 * * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/check_google_count.py > /home/pi/tokens_rpi/check_google_count.log 2>&1'
+
+# reboots if low on space
+0 */6 * * * /bin/bash -c '/usr/bin/python3 -u /home/pi/tokens_rpi/space_manager.py >> /home/pi/tokens_rpi/space_manager.log 2>&1'

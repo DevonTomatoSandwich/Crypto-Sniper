@@ -1,0 +1,9 @@
+# pip3 install -r requirements.txt
+
+Flask
+python-dotenv
+matplotlib
+mysql-connector
+pytz
+requests
+web3

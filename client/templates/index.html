@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>tokens!</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<script>
+
+  function click_markbad_button() {
+    /*
+    Fired on clicking Mark Bad button.
+    Opens an alert infoming that the selected token will be marked bad
+    for the selected cause. Handles the confirmation and calls route 
+    "markbad" which updates the token in the database setting the mature 
+    status to bad with a cause.
+    */
+    console.log('click_markbad_button');
+    if ("{{state['info_row'] is not none}}" != "True") {
+      alert("Please select a token before marking bad")
+      return
+    }
+    var e = document.getElementById("selected_cause");
+    var cause_str = e.options[e.selectedIndex].value;
+    // ok_str = "if state['info_row'] is not none else ''"
+    let text = (`
+      About to markbad the token\n
+          name: {{ state['info_row'][0] if state['info_row'] is not none else '' }}\n
+          pair: {{state['info_row'][2][:6] if state['info_row'] is not none else ''}}...{{state['info_row'][2][-4:] if state['info_row'] is not none else ''}}\n
+          cause: ${cause_str}
+    `);
+    if (confirm(text) == true) {
+      document.getElementById("markbad_cause").value = cause_str;
+      document.getElementById('markbad_form').submit();
+    }
+  }
+
+  function send_post(url, params, success) {
+    /*
+    A function to handle a typical XMLHttp post request
+    Args:
+      url (str)           :   url of route to post to
+      params (str)        :   string of "key=value" args separated by &
+      success (function)  :   the callback function to fire on success
+    */
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200)
+        success(this);
+    }
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    xhr.send(params);
+  }
+
+  function click_buy_button() {
+    /*
+    Fired on clicking Buy button.
+    Sends data in the buy form to route "quote" which gives data 
+    suffient for a quote to buy. calls success_quote on success
+    */
+    console.log("click_buy_button");
+    if ("{{state['info_row'] is not none}}" != "True") {
+      alert("Please select a token before buying")
+      return
+    }
+    var usd = document.getElementById("buy_usd").value;
+    var gas = document.getElementById("buy_gas").value;
+    var hrs = document.getElementById("buy_hrs").value;
+    params = `usd=${usd}&gas=${gas}&hrs=${hrs}`;
+    send_post("/quote", params, success_quote)
+  }
+
+  function success_quote(context) {
+    /*
+    Called on success receiving quote data.
+    Show the quote message, if quote confirmed the purchase will
+    attempt to go through, calling the buy route
+    Args
+      context (XMLHttpRequest)  :   The context for request
+    */
+    console.log("success_quote");
+    var data = JSON.parse(context.responseText);
+    // balance check
+    if (data.usd_remain < 0) {
+      alert("not enough balance");
+      return;
+    }
+    // high gas check
+    else if (data.gas_fee * data.usd_on_bnb > 1) {
+      alert("gas fee > $USD 1");
+      return;
+    }
+    if (confirm(data.quote_msg) != true)
+      return // quote dismissed
+    document.getElementById("buy_deadline").value = data.deadline_epoch;
+    document.getElementById("buy_bnb").value = data.bnb;
+    // gas is an input and output parameter with name="gas"
+    document.getElementById("buy_gas_limit").value = data.gas_limit;
+    document.getElementById('buyform').submit();
+  }
+
+</script>
+
+<body class="dark">
+
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  {% for message in messages %}
+  <p class="flash">{{ message }}</p>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+  <!-- reload -->
+  <form action="#" method="POST">
+    <input class="button" type="Submit" value="Reload All Tokens">
+  </form>
+
+  <!-- all tokens header -->
+  <div class="section_heading">All Tokens [{{state['all_matrix_count']}}/300]</div>
+  <div class="all_tokens_header">
+    <table>
+      <colgroup>
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>token_name</th>
+          <th>google_results_count</th>
+          <th>recorder_time</th>
+          <th>mature_status_cause</th>
+          <th>liquidity</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+
+  <!-- all tokens data -->
+  <div class="all_tokens_data">
+    <table>
+      <colgroup>
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+        <col style="width:20%">
+      </colgroup>
+
+      <tbody>
+
+        {% for row in state["all_matrix"] %}
+        <tr>
+          <td class="token_name">
+            <a
+              href="{{ url_for('token_click', n=row[0], gc=(row[1] if row[1] is not none else 'null'), mt=row[2], p=row[3], rt=row[4], ms=(row[5] if row[5] is not none else 'null'), l=row[6]) }}">{{row[0]}}</a>
+          </td>
+          <td> {{row[1]}}</td>
+          <td> {{row[4]}}</td>
+          <td> {{row[5]}}</td>
+          <td> {{row[6]}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- Token Info -->
+  <div class="section_heading">Token Info</div>
+  <table class="info">
+    <colgroup>
+      <col>
+      <col>
+      <col>
+      <col>
+    </colgroup>
+    <tbody>
+      <tr>
+        <th>token_name</th>
+        <td>{{state["info_row"][0] or ''}}</td>
+        <th>main_token</th>
+        <td>{{state["info_row"][2] or ''}}</td>
+      </tr>
+      <tr>
+        <th>recorder_time</th>
+        <td>{{state["info_row"][4] or ""}}</td>
+        <th>pair</th>
+        <td>{{state["info_row"][3] or ""}}</td>
+      </tr>
+      <tr>
+        <th>liquidity</th>
+        <td>{{state["info_row"][6] or ""}}</td>
+        <th>mature_status_cause</th>
+        <td>{{state["info_row"][5] or ""}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- Actions -->
+  <div id="actions">
+    <div class="action_container">
+      <div class="section_heading">Mark Bad</div>
+      <div class="action">
+        <div class="darktext">Marks the token as bad with a cause in the below dropdown</div>
+
+        <div>
+          <select id="selected_cause">
+            {% for _cause in state['causes'] %}
+            <option value="{{_cause}}">{{_cause}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <form id="markbad_form" action="{{url_for('markbad')}}" method="POST">
+            <input type="hidden" id="markbad_cause" name="cause">
+            <button type="button" onClick="click_markbad_button()"> Mark Bad </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="action_container">
+      <div class="section_heading">Buy</div>
+      <form id="buyform" action="{{url_for('buy')}}" method="POST">
+        <div class="action">
+
+          <table class="action_table">
+            <colgroup>
+              <col>
+              <col>
+            </colgroup>
+            <tr>
+              <td>$USD value</td>
+              <td><input type="text" id="buy_usd" value="3" /></td>
+            </tr>
+            <tr>
+              <td>Gas Pri (gwei)</td>
+              <td><input type="text" id="buy_gas" name="gas" value="5" /></td>
+            </tr>
+            <tr>
+              <td>Expiry (h)</td>
+              <td><input type="text" id="buy_hrs" value="1" /></td>
+            </tr>
+          </table>
+
+          <div class="warningtext">Warning, some transactions may fail with loss in investment + gas,
+            please use pancakeswap website as it is more reliable
+          </div>
+
+          <div>
+            <!-- buy params -->
+            <input type="hidden" id="buy_deadline" name="deadline">
+            <input type="hidden" id="buy_bnb" name="bnb">
+            <input type="hidden" id="buy_gas_limit" name="gas_limit">
+            <!-- on buy click -->
+            <button type="button" onClick="click_buy_button()"> Buy </button>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+# python
+__pycache__
+
+# mac files
+.DS_Store
+
+# virtual environment
+.venv
+
+# sql
+database/*
+!database/db_create.sql
+
+# boring logs from the server
+logs
+*.log
+
+# matplot or other picture files
+*.png
+
+# strategies / clutter
+research/
+
+# environment
+# .env* # todo last 2nd commit will gitignore this

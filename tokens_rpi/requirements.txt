@@ -1,0 +1,10 @@
+# pip3 install -r tokens_rpi/requirements.txt
+
+beautifulsoup4
+gpiozero
+mariadb
+pyvirtualdisplay
+requests
+selenium
+web3
+python-dotenv
